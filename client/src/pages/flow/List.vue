@@ -413,12 +413,21 @@ export default {
               var content = await schemamappingModel.get(m._schemamapping)
               content.data['sourceid'] = sourceRef // _.chain(_.union(...mergeModules)).find((fnd) => { return fnd._id === event.incoming.__text }).value()._sourceRef
               content.data.MapData = await Promise.all(_.map(content.data.MapData, async (schema) => {
-                return {
-                  producerField: schema.producerField,
-                  transform: schema.transform,
-                  consumerField: schema.ctype ? (await self.getMapData(schema.consumerField)) : _.first(schema.consumerField)
+                if (!schema.consumerField.length < 1) {
+                  return {
+                    producerField: schema.producerField,
+                    transform: schema.transform,
+                    consumerField: schema.ctype ? (await self.getMapData(schema.consumerField)) : _.first(schema.consumerField)
+                  }
+                } else {
+                  return
                 }
               }))
+              for (var i = 0; i < content.data.MapData.length; i++) {
+                if (content.data.MapData[i] === undefined) {
+                  content.data.MapData.splice(i, 1)
+                }
+              }
               content.data.MapData = self.mapDataConvertToSquenceFlow(content.data.MapData)
               return content.data
             }))
